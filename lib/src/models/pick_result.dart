@@ -52,6 +52,47 @@ class PickResult {
   final String? website;
   final List<Review>? reviews;
 
+  // Get Address Line 1, which includes street number and route (street name)
+  String get addressLine1 {
+    final streetNumber = _findComponent('street_number')?.longName ?? '';
+    final route = _findComponent('route')?.longName ?? '';
+    return '$streetNumber $route'.trim();
+  }
+
+  // Get Address Line 2, which includes additional information such as suite or apartment number
+  String get addressLine2 => _findComponent('subpremise')?.longName ?? '';
+
+  // Get Suburb, which is the locality or neighborhood within a city
+  String get suburbOlny => _findComponent('locality')?.longName ?? '';
+
+  // Get Suburb, which is the locality or neighborhood within a city
+  String get suburb {
+    final locality = _findComponent('locality')?.longName ?? '';
+    if (locality.isNotEmpty) {
+      return locality;
+    }
+    // If 'locality' is empty, try to get 'sublocality'
+    return _findComponent('sublocality')?.longName ?? '';
+  }
+
+  // Get State, which is the administrative area level 1 (usually the state or province)
+  String get state =>
+      _findComponent('administrative_area_level_1')?.shortName ?? '';
+
+  // Get Postcode, which is the postal code for the address
+  String get postcode => _findComponent('postal_code')?.longName ?? '';
+
+  // Helper method to find an address component by type
+  AddressComponent? _findComponent(String type) {
+    return addressComponents?.firstWhere(
+      (component) => component.types.contains(type),
+      orElse: () => AddressComponent(
+          longName: '',
+          shortName: '',
+          types: []),
+    );
+  }
+
   factory PickResult.fromGeocodingResult(GeocodingResult result) {
     return PickResult(
       placeId: result.placeId,
